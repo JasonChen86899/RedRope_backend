@@ -22,6 +22,8 @@ var anotherHalf ={};
 var male = [];
 var female = [];
 var socketObj_dic = new Array();
+var userStatus = {};
+
 app.get('/',function (req, res){
   res.write('hello this is red role');
   res.end();
@@ -35,6 +37,7 @@ app.get('/match/:id/:sexual',function (req, res){
       if(sexual == 'male'){
         if(female.length == 0){
           male.unshift(id);
+	  userStatus[id]= 0;
           res.write('null');
           res.end();
         }else{
@@ -42,6 +45,7 @@ app.get('/match/:id/:sexual',function (req, res){
           dic['sex'] = 'female';
           dic['id'] = female.pop();
           anotherHalf[dic['id']] = id;
+	  userStatus[id]= 1;
           res.write(JSON.stringify(dic));
           res.end();
         }
@@ -49,6 +53,7 @@ app.get('/match/:id/:sexual',function (req, res){
       if(sexual == 'female'){
         if(male.length == 0){
           female.unshift(id);
+	  userStatus[id]=0;
           res.write('null');
           res.end();
         }else{
@@ -56,6 +61,7 @@ app.get('/match/:id/:sexual',function (req, res){
           dic['sex'] = 'male';
           dic['id'] = male.pop();
           anotherHalf[dic['id']] = id;
+	  userStatus[id]= 1;
           res.write(JSON.stringify(dic));
           res.end();
         }
@@ -73,6 +79,42 @@ app.get('/getAnotherHalf/:id',function (req, res){
   res.write(JSON.stringify('null'));
 }
   res.end();
+});
+
+//
+var userId = 0;
+var userIdMap={};
+app.get('/getUserId/:s',function (req, res){
+	var s = req.params.s;
+	if(userIdMap[s]){	
+	res.write(JSON.stringify(userIdMap[s]));
+}else{
+	userId = userId+1;
+	userIdMap[s]= userId;
+	res.write(JSON.stringify({'id':userId}));	
+}
+	res.end();
+});
+//
+
+app.get('/getUserInfo/:id',function (req, res){
+	var id = req.params.id;
+	if(userStatus[id]){
+	res.write(JSON.stringify({'status':userStatus[id]}));
+}else{
+	res.write(JSON.stringify({'status':-1}));
+}
+	res.end();
+});
+//
+app.get('/endChat/:id_1/:id_2',function (req, res){
+	var id1 = req.params.id_1;
+	var id2 = req.params.id_2;
+	if(userStatus[id]== 1){
+		wsDic[id1] = null;
+		wsDic[id2] = null;
+		userStatus[id] = -1;
+}
 });
 //
 io.sockets.on('connect',function (socket){
