@@ -42,8 +42,10 @@ app.get('/match/:id/:sexual',function (req, res){
           res.end();
         }else{
           var dic = {};
-          dic['sex'] = 'female';
+          //dic['avatarUrl'] = userAvatarUrl[id];
+          //dic['sex'] = 'female';
           dic['id'] = female.pop();
+	  dic['avatarUrl'] = userAvatarUrl[dic['id']];
           anotherHalf[dic['id']] = id;
 	  userStatus[id]= 1;
           res.write(JSON.stringify(dic));
@@ -58,8 +60,10 @@ app.get('/match/:id/:sexual',function (req, res){
           res.end();
         }else{
           var dic = {};
-          dic['sex'] = 'male';
+          //dic['avatarUrl'] = userAvatarUrl[male.pop()];
+          //dic['sex'] = 'male';
           dic['id'] = male.pop();
+          dic['avatarUrl'] = userAvatarUrl[dic['id']];
           anotherHalf[dic['id']] = id;
 	  userStatus[id]= 1;
           res.write(JSON.stringify(dic));
@@ -74,7 +78,10 @@ app.get('/match/:id/:sexual',function (req, res){
 app.get('/getAnotherHalf/:id',function (req, res){
   var id = req.params.id;
   if(anotherHalf[id]){
-  res.write(JSON.stringify(anotherHalf[id]));
+	var dic={};
+	dic['id'] = anotherHalf[id];
+	dic['avatarUrl'] = userAvatarUrl[anotherHalf[id]];
+	res.write(JSON.stringify(dic));
 }else{
   res.write(JSON.stringify('null'));
 }
@@ -84,17 +91,24 @@ app.get('/getAnotherHalf/:id',function (req, res){
 //
 var userId = 0;
 var userIdMap={};
-app.get('/getUserId/:s',function (req, res){
-	var s = req.params.s;
-	if(userIdMap[s]){	
+var userAvatarUrl={};
+app.get('/getUserId/',function (req, res){
+	var s = req.query;
+	console.log(req.query);
+	var s = s['avatarUrl'];
+	//console.log(s);
+
+	if(userIdMap[s]){
 	res.write(JSON.stringify(userIdMap[s]));
 }else{
 	userId = userId+1;
-	userIdMap[s]= userId;
-	res.write(JSON.stringify({'id':userId}));	
+	userIdMap[s] = userId;
+	userAvatarUrl[userId] = s;
+	res.write(JSON.stringify(userId));
 }
 	res.end();
 });
+
 //
 
 app.get('/getUserInfo/:id',function (req, res){
